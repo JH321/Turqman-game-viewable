@@ -34,15 +34,19 @@ class Player(pg.sprite.Sprite):
         ground_hits = pg.sprite.spritecollide(self, self.game.ground, False)
         if hits or ground_hits:
             if not is_opposite:
-                self.vel.y = -20
+                self.vel.y = -settings.JUMP_VELOCITY
             else:
-                self.vel.y = 20 
+                self.vel.y = settings.JUMP_VELOCITY
  
     def update(self):
         hits = pg.sprite.spritecollide(self, self.game.platforms, False)
         ground_hits = pg.sprite.spritecollide(self, self.game.ground, False)
         keys = pg.key.get_pressed()
         self.acc = vec(0, settings.PLAYER_GRAVITY)
+        if keys[pg.K_c] and self.game.jetpack_fuel > 0:
+            self.acc.y = -0.2
+            self.game.jetpack_fuel -= 3
+            print(self.game.jetpack_fuel)
         if hits or ground_hits:
             if keys[pg.K_LEFT]:
                 self.acc.x = -settings.PLAYER_ACC

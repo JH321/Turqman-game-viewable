@@ -20,7 +20,7 @@ class Game:
         self.obstacles = pg.sprite.Group()
         self.obstacles_list = []
         self.ground = pg.sprite.Group()
-        self.numb_changes = 4
+        self.jetpack_fuel = 500
         self.is_opposite = False #determines if gravity is inverse
         self.player = player.Player(self)
         self.all_sprites.add(self.player)
@@ -51,7 +51,7 @@ class Game:
             checks for collision of player'''
         if self.player.pos.x + settings.IMG_WIDTH / 2 > settings.WIDTH:
             self.player.set_spawn()
-            self.numb_changes = 4
+            self.jetpack_fuel = 500
             for plat in self.platforms:
                 plat.kill()
             self.create_platforms()
@@ -154,14 +154,14 @@ class Game:
                     self.playing = False
                 self.running = False
            
-            if event.type == pg.KEYDOWN and event.key == pg.K_c:
+            ''''if event.type == pg.KEYDOWN and event.key == pg.K_c:
                 if self.numb_changes > 0:
                     self.numb_changes -= 1
                     settings.PLAYER_GRAVITY *= -1
                     if not self.is_opposite:
                         self.is_opposite = True
                     else:
-                        self.is_opposite = False
+                        self.is_opposite = False'''
             if event.type == pg.KEYDOWN and  event.key == pg.K_UP:
                 print(self.is_opposite)
                 self.player.jump(self.is_opposite)
@@ -174,10 +174,11 @@ class Game:
         self.screen.fill(settings.SKY_BLUE)
         self.all_sprites.draw(self.screen)
         font = pg.font.Font('freesansbold.ttf', 32)
-        gravity_count = font.render(str(self.numb_changes), True, settings.WHITE, settings.BLACK)
+        print("qihdfqfhiwohgfiow;phgoi;pwaahgoiapw")
+        gravity_count = font.render(str(self.jetpack_fuel), True, settings.BLACK)
         text_rect = gravity_count.get_rect()
         text_rect.center = (settings.WIDTH + 50, settings.HEIGHT + 50)
-        self.screen.blit(gravity_count, text_rect)
+        self.screen.blit(gravity_count, text_rect.center)
         pg.display.update()
         pg.display.flip()
  
