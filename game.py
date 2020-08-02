@@ -12,6 +12,11 @@ class Game:
         pg.display.set_caption("Platformer")
         self.clock = pg.time.Clock()
         self.running = True
+        self.new_game = False
+        self.escape_screen = False
+        self.click = False
+        self.mousex = None
+        self.mousey = None
  
     def new(self):
         # start new game
@@ -20,7 +25,7 @@ class Game:
         self.obstacles = pg.sprite.Group()
         self.obstacles_list = []
         self.ground = pg.sprite.Group()
-        self.jetpack_fuel = 500
+        self.jetpack_fuel = 20
         self.is_opposite = False #determines if gravity is inverse
         self.player = player.Player(self)
         self.all_sprites.add(self.player)
@@ -33,13 +38,14 @@ class Game:
         self.all_sprites.add(p_ground)
         self.ground.add(p_ground)
         #creates obstacle
-            
         self.run()
  
     def run(self):
         
         self.playing = True
+        print("method called")
         while self.playing:
+            self.show_escape_screen()
             self.clock.tick(settings.FPS)
             self.events()
             self.update()
@@ -51,7 +57,6 @@ class Game:
             checks for collision of player'''
         if self.player.pos.x + settings.IMG_WIDTH / 2 > settings.WIDTH:
             self.player.set_spawn()
-            self.jetpack_fuel = 500
             for plat in self.platforms:
                 plat.kill()
             self.create_platforms()
@@ -59,6 +64,7 @@ class Game:
         hits = pg.sprite.spritecollide(self.player, self.platforms, False) 
         ground_hits = pg.sprite.spritecollide(self.player, self.ground, False)
         obstacle_hits = pg.sprite.spritecollide(self.player, self.obstacles, False)
+        #creates obstacle platforms
         timer = random.random()
         if len(self.obstacles_list) < 7 and timer < 0.05:
             p = player.Platform(*settings.CREATE_OBSTACLES())
@@ -74,6 +80,8 @@ class Game:
         
         #collision on normal platforms
         if hits:
+            #refuels jetpack when platform hits
+            self.jetpack_fuel = settings.JETPACK_FUEL
             for hit in hits:
                 self.check_collision(hit.rect)
                 if self.player.vel.y > 0:
@@ -121,10 +129,8 @@ class Game:
                 self.player.pos.y = self.player.rect.bottom
                     # self.player.pos = self.player.rect
         #teleports player back to spawn when ground is touched
-        if ground_hits or self.player.rect.left < -25 or self.player.rect.top < -25:
+        if ground_hits or self.player.rect.left < -25 or self.player.rect.top < -25 or self.player.vel.y > 1000:
             self.player.set_spawn()
-            self.player.vel.x = 0
-            self.player.vel.y = 0
         if obstacle_hits:
             self.player.vel.x *= -2
             self.player.vel.y *= -2
@@ -162,6 +168,8 @@ class Game:
                         self.is_opposite = True
                     else:
                         self.is_opposite = False'''
+            if event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE:
+                self.escape_screen = True
             if event.type == pg.KEYDOWN and  event.key == pg.K_UP:
                 print(self.is_opposite)
                 self.player.jump(self.is_opposite)
@@ -172,20 +180,62 @@ class Game:
         
 
         self.screen.fill(settings.SKY_BLUE)
+        #displays jetpack fuel
+        self.draw_text(str(self.jetpack_fuel))
         self.all_sprites.draw(self.screen)
-        font = pg.font.Font('freesansbold.ttf', 32)
-        print("qihdfqfhiwohgfiow;phgoi;pwaahgoiapw")
-        gravity_count = font.render(str(self.jetpack_fuel), True, settings.BLACK)
-        text_rect = gravity_count.get_rect()
-        text_rect.center = (settings.WIDTH + 50, settings.HEIGHT + 50)
-        self.screen.blit(gravity_count, text_rect.center)
         pg.display.update()
-        pg.display.flip()
  
     def show_start_screen(self):
         #game start screen
-        pass
- 
+        while not self.new_game:
+            self.screen.fill(settings.SKY_BLUE)
+            self.draw_text("Main Menu")
+
+            self.get_mousepos()
+            print("running")
+            button_1 = pg.Rect(50, 100, 200, 50)
+            if button_1.collidepoint(self.mousex, self.mousey):
+                if self.click:
+                    self.new_game = True
+            self.click = False
+            pg.draw.rect(self.screen, settings.WHITE, button_1)
+            for event in pg.event.get():
+                    if event.type == pg.QUIT:
+                        pg.quit()
+                        sys.exit()
+                    if event.type == pg.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            self.click = True
+            pg.display.update()
+
+    def show_escape_screen(self):
+        while self.escape_screen:
+            print("test esscape butt")
+            self.screen.fill(settings.SKY_BLUE)
+            self.draw_text("Options")
+            self.get_mousepos()
+            button_1 = pg.Rect(50, 100, 200, 50)
+            button_2 = pg.Rect(50, 500, 200, 50)
+            if button_1.collidepoint(self.mousex, self.mousey):
+                if self.click:
+                    self.new_game = False
+                    self.playing = False
+                    self.escape_screen = False
+            if button_2.collidepoint(self.mousex, self.mousey):
+                if self.click:
+                    self.escape_screen = False
+            self.click = False
+            pg.draw.rect(self.screen, settings.WHITE, button_1)
+            pg.draw.rect(self.screen, settings.WHITE, button_2)
+            for event in pg.event.get():
+                    if event.type == pg.QUIT:
+                        pg.quit()
+                        sys.exit()
+                    if event.type == pg.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            self.click = True
+            pg.display.update()
+
     def show_go_screen(self):
         pass
 
@@ -194,16 +244,27 @@ class Game:
             p = player.Platform(*plat)
             self.all_sprites.add(p)
             self.platforms.add(p)
+
     def create_test_level(self):
         for plat in settings.TEST_LEVEL:
             p = player.Platform(*plat)
             self.all_sprites.add(p)
             self.platforms.add(p)
 
+    def draw_text(self, words):
+        font = pg.font.Font('freesansbold.ttf', 32)
+        text = font.render(words, True, settings.BLACK)
+        text_rect = text.get_rect()
+        text_rect.center = (100, 50)
+        self.screen.blit(text, text_rect.center)
+    
+    def get_mousepos(self):
+        self.mousex, self.mousey = pg.mouse.get_pos()
+
 g = Game()
-g.show_start_screen()
 while g.running:
-    g.new()
-    g.show_go_screen()
- 
-pg.quit()
+    if g.new_game:
+        g.new()
+        g.show_go_screen()
+    else:
+        g.show_start_screen()

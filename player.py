@@ -21,6 +21,8 @@ class Player(pg.sprite.Sprite):
         self.acc = vec(0, 0)
  
     def set_spawn(self):
+        self.acc = vec(0, 0)
+        self.vel = vec(0, 0)
         self.rect.center = (settings.IMG_WIDTH / 2, settings.HEIGHT / 2 - 25)
         self.pos = vec(self.rect.center)
  
@@ -43,10 +45,6 @@ class Player(pg.sprite.Sprite):
         ground_hits = pg.sprite.spritecollide(self, self.game.ground, False)
         keys = pg.key.get_pressed()
         self.acc = vec(0, settings.PLAYER_GRAVITY)
-        if keys[pg.K_c] and self.game.jetpack_fuel > 0:
-            self.acc.y = -0.2
-            self.game.jetpack_fuel -= 3
-            print(self.game.jetpack_fuel)
         if hits or ground_hits:
             if keys[pg.K_LEFT]:
                 self.acc.x = -settings.PLAYER_ACC
@@ -60,6 +58,10 @@ class Player(pg.sprite.Sprite):
             self.acc.x += self.vel.x * settings.PLAYER_FRICTION
         else:
             #no player control while in mid air
+            if keys[pg.K_c] and self.game.jetpack_fuel > 0:
+                self.acc.y = -0.2
+                self.game.jetpack_fuel -= 1
+                print(self.game.jetpack_fuel)
             self.acc.x = 0
         self.vel += self.acc
         self.pos.y += self.vel.y + 0.5 * self.acc.y
