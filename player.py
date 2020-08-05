@@ -45,24 +45,25 @@ class Player(pg.sprite.Sprite):
         ground_hits = pg.sprite.spritecollide(self, self.game.ground, False)
         keys = pg.key.get_pressed()
         self.acc = vec(0, settings.PLAYER_GRAVITY)
+        
+        if keys[pg.K_LEFT]:
+            self.acc.x = -settings.PLAYER_ACC
+            print("left")
+        if keys[pg.K_RIGHT]:
+            self.acc.x = settings.PLAYER_ACC
+            print("right")
+        if keys[pg.K_LSHIFT]:
+            self.acc.x *= 1.7
+            print("sprint")
         if hits or ground_hits:
-            if keys[pg.K_LEFT]:
-                self.acc.x = -settings.PLAYER_ACC
-                print("left")
-            if keys[pg.K_RIGHT]:
-                self.acc.x = settings.PLAYER_ACC
-                print("right")
-            if keys[pg.K_LSHIFT]:
-                self.acc.x *= 1.7
-                print("sprint")
             self.acc.x += self.vel.x * settings.PLAYER_FRICTION
         else:
-            #no player control while in mid air
-            if keys[pg.K_c] and self.game.jetpack_fuel > 0:
-                self.acc.y = -0.2
-                self.game.jetpack_fuel -= 1
-                print(self.game.jetpack_fuel)
             self.acc.x = 0
+        
+        if keys[pg.K_c] and self.game.jetpack_fuel > 0:
+            self.acc.y = -0.2
+            self.game.jetpack_fuel -= 1
+            print(self.game.jetpack_fuel)
         self.vel += self.acc
         self.pos.y += self.vel.y + 0.5 * self.acc.y
         self.pos.x += self.vel.x
