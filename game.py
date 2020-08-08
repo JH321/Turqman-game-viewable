@@ -202,6 +202,9 @@ class Game:
             self.click = False
             pg.draw.rect(self.screen, settings.WHITE, button_1)
             self.draw_text("Start", (settings.WIDTH / 2 + 60) - 100, (settings.HEIGHT / 2 + 10) - 25)
+            self.draw_text("Arrow keys to move and jump", 0, 0)
+            self.draw_text("Left Shift to sprint", 0, 40)
+            self.draw_text("C key to jetpack (when off the ground)", 0, 80)
             for event in pg.event.get():
                     if event.type == pg.QUIT:
                         pg.quit()
