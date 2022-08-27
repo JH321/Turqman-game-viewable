@@ -1,6 +1,8 @@
 # Turqman-game-viewable
 Viewable repository of game made with pygame
 
+Demo: https://youtu.be/Gxjgc71ek4A
+
 An old project from high school. A simple 2D platformer parkour game.
 Co-author is Ramez Hatab. 
 
